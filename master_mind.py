@@ -16,6 +16,11 @@ Se hai del tempo da impiegare e vuoi arricchire il programma con altre funzional
     top ten: ad ogni partita il gioco potrebbe darmi un punteggio per la risoluzione, basato sul tempo che ci metto a scoprire una combinazione o sul numero di tentativi che ho a disposizione. Come giocatore vorrei che il programma mi desse la top ten dei giocatori migliori.
 """
 
+# TODO inserire top ten facendo un file json con array di giocatori e punteggio
+# TODO in fase iniziale chiedere nome con cui si vuole salvare il proprio punteggio
+# TODO fare calcolo tentativi per ogni user e salvataggio su file json
+
+
 import random
 
 
