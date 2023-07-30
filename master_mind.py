@@ -16,12 +16,19 @@ Se hai del tempo da impiegare e vuoi arricchire il programma con altre funzional
     top ten: ad ogni partita il gioco potrebbe darmi un punteggio per la risoluzione, basato sul tempo che ci metto a scoprire una combinazione o sul numero di tentativi che ho a disposizione. Come giocatore vorrei che il programma mi desse la top ten dei giocatori migliori.
 """
 
-# TODO inserire top ten facendo un file json con array di giocatori e punteggio
-# TODO in fase iniziale chiedere nome con cui si vuole salvare il proprio punteggio
-# TODO fare calcolo tentativi per ogni user e salvataggio su file json
+# TODO aggiungere impostazione per visualizzare top 10
+# TODO aggiungere impostazione per configurare quanti simboli sono ammessi
+# TODO sistemare opzione con la guida perche non parte bene sulla pressione di invio
 
 
 import random
+import os
+import json
+import time
+
+file_path = "top_ten.json"
+points = 0
+username = ""
 
 
 def guide():
@@ -76,23 +83,59 @@ def check_attempt(size, code, attempt):
         return False
 
 
+def save_time():
+    global time
+    global username
+    global file_path
+
+    if os.path.exists(file_path):
+        # Se esiste, carica i dati esistenti dal file
+        with open(file_path, 'r') as file:
+            try:
+                existing_data = json.load(file)
+            except json.JSONDecodeError:
+                # Se il file è vuoto o non contiene dati JSON validi,
+                # impostiamo existing_data come una lista vuota.
+                existing_data = []
+    else:
+        # Se il file non esiste, crea una lista vuota come existing_data
+        existing_data = []
+
+    data = [{"username": username, "time": time}]
+
+    # Unisce i dati esistenti con i nuovi dati
+    merged_data = existing_data + data
+
+    # Salva i dati nel file
+    with open(file_path, 'w') as file:
+        json.dump(merged_data, file)
+
+
 def start_game(size):
+    global time
     code = generate_code(size)
+    start_time = time.time()
     while True:
         attempt, err = get_user_attempt(size)
         if err == "error":
             continue
         elif err == "quit":
-            print("Hai deciso di arrenderti. Il codice era: ", code)
+            print(username + " hai deciso di arrenderti. Il codice era: ", code)
             exit()
         elif check_attempt(size, code, attempt):
-            print("Hai indovinato il codice!")
-            break
+            print("Hai indovinato il codice! Bravo " + username + "!")
+            end_time = time.time()  # Registra l'istante di fine del gioco
+            time = end_time - start_time
+            print("Tempo impiegato: {:.2f} secondi".format(time))
+            save_time()
+            exit()
         else:
             print("Non hai indovinato il codice.")
 
 
 def config_game():
+    global username
+    username = input("Inserisci il tuo nome: ")
     level = input("Scegli il livello di difficolta (1, 2, 3): ")
     if level == "1":
         print("Hai scelto il livello 1, dovrai indovinare un codice di 3 cifre. Per arrenderti premi q.")
@@ -116,9 +159,12 @@ if __name__ == "__main__":
     know_game = input("Sai giocare a Master Mind? - Premi Y per iniziare o N per leggere le istruzioni: ")
     if know_game == "N":
         guide()
-        understood_game = input("Sei pronto per iniziare? - Premi Y per iniziare o INVIO per uscire: ")
-        if understood_game == "":
+        understood_game = input("Sei pronto per iniziare? - Premi Y per iniziare o q per uscire: ")
+        if understood_game == "Y":
             config_game()
+        elif understood_game == "q":
+            print("Alla prossima!")
+            exit()
         else:
             print("Input non valido. Riavvia il programma e riprova.")
             exit()
