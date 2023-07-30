@@ -1,21 +1,19 @@
 """
 Conosci il gioco Master Mind?
-
 Consiste nel cercare di dedurre per tentativi un codice segreto.
 Ecco qualche indicazione per realizzare il gioco:
-ad ogni partita bisogna scoprire un codice segreto che consiste in una sequenza di tre cifre nel range 0-9
-ad ogni turno il giocatore fa un tentativo proponendo una sequenza di tre cifre
-se la sequenza proposta ad un turno è corrisponde al codice segreto allora il giocatore ha vinto
-altrimenti il giocatore ottiene un suggerimento che consiste di due informazioni:
-il numero di cifre presenti nel codice segreto ma collocate in una posizione errata della sequenza (aka “cifra giusta al posto sbagliato”)
-il numero di cifre presenti nel codice segreto e che sono anche nel posto giusto della sequenza (aka “cifra giusta al posto giusto”)
-in qualsiasi momento il giocatore si può arrendere e in quel caso gli viene rivelata la combinazione segreta
+    ad ogni partita bisogna scoprire un codice segreto che consiste in una sequenza di tre cifre nel range 0-9
+    ad ogni turno il giocatore fa un tentativo proponendo una sequenza di tre cifre
+    se la sequenza proposta ad un turno è corrisponde al codice segreto allora il giocatore ha vinto
+    altrimenti il giocatore ottiene un suggerimento che consiste di due informazioni:
+    il numero di cifre presenti nel codice segreto ma collocate in una posizione errata della sequenza (aka “cifra giusta al posto sbagliato”)
+    il numero di cifre presenti nel codice segreto e che sono anche nel posto giusto della sequenza (aka “cifra giusta al posto giusto”)
+    in qualsiasi momento il giocatore si può arrendere e in quel caso gli viene rivelata la combinazione segreta
 Ulteriori sviluppi (facoltativi)
-
 Se hai del tempo da impiegare e vuoi arricchire il programma con altre funzionalità, considera i seguenti desiderata che potrei avere come utente:
-duello: due giocatori si sfidano, ciascuno stabilisce un codice segreto e cerca di indovinare il codice segreto dell’altro, alternandosi a turno nei tentativi
-configurazione: potrei voler regolare la difficoltà del gioco stabilendo di quante cifre consiste la sequenza del codice segreto, oppure ampliando o restringendo il numero di simboli ammessi
-top ten: ad ogni partita il gioco potrebbe darmi un punteggio per la risoluzione, basato sul tempo che ci metto a scoprire una combinazione o sul numero di tentativi che ho a disposizione. Come giocatore vorrei che il programma mi desse la top ten dei giocatori migliori.
+    duello: due giocatori si sfidano, ciascuno stabilisce un codice segreto e cerca di indovinare il codice segreto dell’altro, alternandosi a turno nei tentativi
+    configurazione: potrei voler regolare la difficoltà del gioco stabilendo di quante cifre consiste la sequenza del codice segreto, oppure ampliando o restringendo il numero di simboli ammessi
+    top ten: ad ogni partita il gioco potrebbe darmi un punteggio per la risoluzione, basato sul tempo che ci metto a scoprire una combinazione o sul numero di tentativi che ho a disposizione. Come giocatore vorrei che il programma mi desse la top ten dei giocatori migliori.
 """
 
 import random
@@ -40,20 +38,72 @@ def generate_code(size):
     return code
 
 
-def start_game():
+def get_user_attempt(size):
+    attempt = []
+    input_string = input("Inserisci il codice: ")
+    if (len(input_string) != size or not input_string.isnumeric()) and input_string != "q":
+        print("Input non valido. Riprova.")
+        return [], "error"
+    elif input_string == "q":
+        return [], "quit"
+    for i in range(size):
+        attempt.append(int(input_string[i]))
+    return attempt, ""
+
+
+def analyze_attempt(size, code, attempt):
+    right_place = 0
+    wrong_place = 0
+    for i in range(size):
+        if attempt[i] == code[i]:
+            right_place += 1
+        elif attempt[i] in code:
+            wrong_place += 1
+    print("Cifre giuste al posto giusto: ", right_place)
+    print("Cifre giuste al posto sbagliato: ", wrong_place)
+
+
+def check_attempt(size, code, attempt):
+    if code == attempt:
+        return True
+    else:
+        analyze_attempt(size, code, attempt)
+        return False
+
+
+def start_game(size):
+    code = generate_code(size)
+    while True:
+        attempt, err = get_user_attempt(size)
+        if err == "error":
+            continue
+        elif err == "quit":
+            print("Hai deciso di arrenderti. Il codice era: ", code)
+            exit()
+        elif check_attempt(size, code, attempt):
+            print("Hai indovinato il codice!")
+            break
+        else:
+            print("Non hai indovinato il codice.")
+
+
+def config_game():
     level = input("Scegli il livello di difficolta (1, 2, 3): ")
     if level == "1":
+        print("Hai scelto il livello 1, dovrai indovinare un codice di 3 cifre. Per arrenderti premi q.")
         size = 3
-        return generate_code(size)
+        start_game(size)
     elif level == "2":
+        print("Hai scelto il livello 2, dovrai indovinare un codice di 4 cifre. Per arrenderti premi q.")
         size = 4
-        return generate_code(size)
+        start_game(size)
     elif level == "3":
+        print("Hai scelto il livello 3, dovrai indovinare un codice di 5 cifre. Per arrenderti premi q.")
         size = 5
-        return generate_code(size)
+        start_game(size)
     else:
         print("Input non valido. Riavvia il programma e riprova.")
-        return exit()
+        exit()
 
 
 if __name__ == "__main__":
@@ -63,15 +113,13 @@ if __name__ == "__main__":
         guide()
         understood_game = input("Sei pronto per iniziare? - Premi Y per iniziare o INVIO per uscire: ")
         if understood_game == "":
-            code = start_game()
-            print(code)
+            config_game()
         else:
             print("Input non valido. Riavvia il programma e riprova.")
             exit()
     elif know_game == "Y":
         print("Iniziamo!")
-        code = start_game()
-        print(code)
+        config_game()
     else:
         print("Input non valido. Riavvia il programma e riprova.")
         exit()
