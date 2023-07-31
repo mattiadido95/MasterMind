@@ -16,9 +16,10 @@ Se hai del tempo da impiegare e vuoi arricchire il programma con altre funzional
     top ten: ad ogni partita il gioco potrebbe darmi un punteggio per la risoluzione, basato sul tempo che ci metto a scoprire una combinazione o sul numero di tentativi che ho a disposizione. Come giocatore vorrei che il programma mi desse la top ten dei giocatori migliori.
 """
 
-# TODO aggiungere impostazione per visualizzare top 10
 # TODO aggiungere impostazione per configurare quanti simboli sono ammessi
-# TODO sistemare opzione con la guida perche non parte bene sulla pressione di invio
+# TODO aggiungere impostazione per configurare modalita duello fra due player contemporaneamente
+# TODO modificare menu iniziale per selezione multipla delle opzioni
+
 
 
 import random
@@ -106,6 +107,9 @@ def save_time():
     # Unisce i dati esistenti con i nuovi dati
     merged_data = existing_data + data
 
+    # Ordina i dati in base al tempo
+    merged_data.sort(key=lambda x: x["time"])
+
     # Salva i dati nel file
     with open(file_path, 'w') as file:
         json.dump(merged_data, file)
@@ -154,10 +158,37 @@ def config_game():
         exit()
 
 
+def print_top_ten():
+    global file_path
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            try:
+                existing_data = json.load(file)
+            except json.JSONDecodeError:
+                existing_data = []
+    else:
+        existing_data = []
+    if len(existing_data) == 0:
+        print("Non ci sono ancora giocatori nella top ten.")
+    else:
+        print("***** Top Ten *****")
+        for i in range(len(existing_data)):
+            print(str(i + 1) + ") " + existing_data[i]["username"] + " - " + str(existing_data[i]["time"]) + " secondi")
+        print("******************")
+
+
 if __name__ == "__main__":
     print("***** Master Mind *****")
-    know_game = input("Sai giocare a Master Mind? - Premi Y per iniziare o N per leggere le istruzioni: ")
-    if know_game == "N":
+
+    print("Menu:")
+    print("1) Inizia a giocare")
+    print("2) Leggi le istruzioni")
+    print("3) Vedi la top ten")
+    print("4) Esci")
+    choice = input("Cosa vuoi fare? ")
+    if choice == "1":
+        config_game()
+    elif choice == "2":
         guide()
         understood_game = input("Sei pronto per iniziare? - Premi Y per iniziare o q per uscire: ")
         if understood_game == "Y":
@@ -168,9 +199,11 @@ if __name__ == "__main__":
         else:
             print("Input non valido. Riavvia il programma e riprova.")
             exit()
-    elif know_game == "Y":
-        print("Iniziamo!")
-        config_game()
+    elif choice == "3":
+        print_top_ten()
+    elif choice == "4":
+        print("Alla prossima!")
+        exit()
     else:
         print("Input non valido. Riavvia il programma e riprova.")
         exit()
